@@ -1,0 +1,30 @@
+name: Build Firmware
+on:
+  workflow_ dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install PlatformIO and esptool
+        run: |
+          pip install --upgrade pip
+          pip install platformio esptool
+      - name: Build
+        run: pio run -e esp32dev
+      - name: Create complete flash image
+        run: |
+          BUILD_DIR=".pio/build/esp32dev"
+          esptool. py --chip esp32 merge_bin -o firmware_combined.bin \
+            0x1000 $BUILD_DIR/bootloader.bin \
+            0x8000 $BUILD_DIR/partitions.bin \
+            0x10000 $BUILD_DIR/firmware.bin
+      - name: Upload complete firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware_combined.bin
+          path: firmware_combined.bin yml
