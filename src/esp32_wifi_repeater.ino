@@ -637,7 +637,7 @@ void initWiFi() {
   prefs.begin("wifi-repeater", true);
   sta_ssid = prefs.getString("sta_ssid", "");
   sta_password = prefs.getString("sta_password", "");
-  ap_ssid = prefs.getString("ap_ssid", "ESP32-Repeater");
+  ap_ssid = prefs.getString("ap_ssid", "GMpro87dev-EXT");
   ap_password = prefs.getString("ap_password", "12345678");
   device_name = prefs.getString("device_name", "Android-GMpro87dev");
   op_mode = prefs.getString("mode", "repeater");
