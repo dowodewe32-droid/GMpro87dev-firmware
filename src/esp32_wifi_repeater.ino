@@ -5,6 +5,8 @@
 #include <Update.h>
 #include <ESPmDNS.h>
 
+void startAP();
+
 #define MAX_CLIENTS 8
 
 const char *hostname = "esp32-repeater";
@@ -624,24 +626,9 @@ void checkConnections() {
   
   if (ap_active) {
     client_count = 0;
-    wifi_sta_list *list = WiFi.softAP_getSTASList();
-    if (list) {
-      for (int i = 0; i < list->num && i < MAX_CLIENTS; i++) {
-        clients[client_count].mac = 
-          String(list->sta[i].mac[0], HEX) + ":" +
-          String(list->sta[i].mac[1], HEX) + ":" +
-          String(list->sta[i].mac[2], HEX) + ":" +
-          String(list->sta[i].mac[3], HEX) + ":" +
-          String(list->sta[i].mac[4], HEX) + ":" +
-          String(list->sta[i].mac[5], HEX);
-        clients[client_count].ip = 
-          String(list->sta[i].ip[0]) + "." +
-          String(list->sta[i].ip[1]) + "." +
-          String(list->sta[i].ip[2]) + "." +
-          String(list->sta[i].ip[3]);
-        clients[client_count].connect_time = millis();
-        client_count++;
-      }
+    int staCount = WiFi.softAPgetStationNum();
+    for (int i = 0; i < staCount && i < MAX_CLIENTS; i++) {
+      client_count++;
     }
   }
 }
