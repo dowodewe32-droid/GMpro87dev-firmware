@@ -139,10 +139,10 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 </div>
 
 <div class="tabs">
-<button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
-<button class="tab" onclick="showTab('connect')">Connect</button>
-<button class="tab" onclick="showTab('clients')">Clients</button>
-<button class="tab" onclick="showTab('settings')">Settings</button>
+<button class="tab active" onclick="showTab('dashboard', this)">Dashboard</button>
+<button class="tab" onclick="showTab('connect', this)">Connect</button>
+<button class="tab" onclick="showTab('clients', this)">Clients</button>
+<button class="tab" onclick="showTab('settings', this)">Settings</button>
 </div>
 
 <div id="dashboard" class="tab-content active">
@@ -418,11 +418,11 @@ async function resetConfig() {
   }
 }
 
-function showTab(tabId) {
+function showTab(tabId, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
-  event.target.classList.add('active');
+  if(btn) btn.classList.add('active');
 }
 
 setInterval(getStatus, 5000);
