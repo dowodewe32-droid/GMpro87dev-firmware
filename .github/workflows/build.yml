@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       
@@ -14,16 +14,49 @@ jobs:
         with:
           python-version: '3.10'
           
-      - name: Install PlatformIO
+      - name: Install PlatformIO and esptool
         run: |
           pip install --upgrade pip
-          pip install platformio
+          pip install platformio esptool
           
       - name: Build
         run: pio run -e esp32dev
-        
-      - name: Upload
+      
+      - name: Prepare flash files
+        id: flash_files
+        run: |
+          BUILD_DIR=".pio/build/esp32dev"
+          echo "files=$(ls $BUILD_DIR/*.bin $BUILD_DIR/bootloader.bin $BUILD_DIR/partitions.bin 2>/dev/null | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          echo "bootloader=$BUILD_DIR/bootloader.bin" >> $GITHUB_OUTPUT
+          echo "partitions=$BUILD_DIR/partitions.bin" >> $GITHUB_OUTPUT
+          echo "app=$BUILD_DIR/esp32dev.bin" >> $GITHUB_OUTPUT
+          ls -la $BUILD_DIR/
+      
+      - name: Create complete flash image
+        run: |
+          pip install esptool
+          BUILD_DIR=".pio/build/esp32dev"
+          python3 << 'PYEOF'
+          import esptool
+          import sys
+          sys.argv = [
+            'esptool.py',
+            '--chip', 'esp32',
+            'merge_bin',
+            '-o', 'firmware_combined.bin',
+            '--flash_mode', 'dio',
+            '--flash_size', '4MB',
+            '--flash_freq', '40m',
+            '0x1000', '.pio/build/esp32dev/bootloader.bin',
+            '0x8000', '.pio/build/esp32dev/partitions.bin',
+            '0x10000', '.pio/build/esp32dev/firmware.bin'
+          ]
+          esptool.cmds.do_main(esptool.cmds.prepare_args(sys.argv))
+          PYEOF
+          ls -lh firmware_combined.bin
+      
+      - name: Upload complete firmware
         uses: actions/upload-artifact@v4
         with:
-          name: firmware.bin
-          path: .pio/build/*/firmware.bin
+          name: firmware_combined.bin
+          path: firmware_combined.bin
